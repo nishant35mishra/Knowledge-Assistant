@@ -2,6 +2,10 @@ package com.project.knowledgeassistant.Filter;
 
 import com.project.knowledgeassistant.services.MyUserDetailsServiceImpl;
 import com.project.knowledgeassistant.utilities.JWTUtility;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,33 +32,53 @@ public class JWTFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String authToken = request.getHeader("Authorization");
-        String token = null ;
-        String email = null ;
+        try {
 
-        if (authToken != null && authToken.startsWith("Bearer ")) {
 
-            token = authToken.substring(7);
-            email = jwtUtility.extractEmail(token);
+            String authToken = request.getHeader("Authorization");
+            String token = null;
+            String email = null;
 
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            if (authToken != null && authToken.startsWith("Bearer ")) {
 
-                UserDetails user = customUserDetailsService.loadUserByUsername(email);
+                token = authToken.substring(7);
+                email = jwtUtility.extractEmail(token);
 
-                if(jwtUtility.checkTokenValidation(token, user.getUsername())) {
+                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-                    UsernamePasswordAuthenticationToken mainToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                    UserDetails user = customUserDetailsService.loadUserByUsername(email);
 
-                    SecurityContextHolder.getContext().setAuthentication(mainToken);
+                    if (jwtUtility.checkTokenValidation(token, user.getUsername())) {
+
+                        UsernamePasswordAuthenticationToken mainToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+
+                        SecurityContextHolder.getContext().setAuthentication(mainToken);
+                    }
+
                 }
+
 
             }
 
 
+            filterChain.doFilter(request, response);
 
+        }catch (ExpiredJwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("JWT token has expired");
+
+        } catch (SignatureException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Invalid JWT signature");
+
+        } catch (MalformedJwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Malformed JWT token");
+
+        } catch (JwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("Invalid JWT token");
         }
-
-        filterChain.doFilter(request, response);
 
 
     }
