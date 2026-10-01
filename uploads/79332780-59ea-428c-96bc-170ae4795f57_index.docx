@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>School Map - Mumbai / Thane Region</title>
+  
+  <!-- Leaflet CSS (integrity removed to avoid SRI block) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  
+  <!-- Leaflet JS (integrity removed) -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  
+  <!-- MarkerCluster CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.css"/>
+  
+  <!-- MarkerCluster JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.js"></script>
+
+  <style>
+    html, body, #map {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    #map {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <div id="map"></div>
+
+  <script>
+    // Initialize map centered on Thane / Mira-Bhayandar area
+    const map = L.map('map', {
+      zoomControl: true
+    }).setView([19.2183, 72.9781], 10);
+
+    // OpenStreetMap tiles
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19
+    }).addTo(map);
+
+    // Marker clustering
+    const markers = L.markerClusterGroup({
+      maxClusterRadius: 45,
+      spiderfyOnMaxZoom: true,
+      showCoverageOnHover: true,
+      zoomToBoundsOnClick: true,
+      animate: true,
+      animateAddingMarkers: true
+    });
+
+    // Schools in Thane, Mira-Bhayandar, Kalyan, etc. region
+    const schools = [
+      { lat: 19.2183, lng: 72.9781, name: "Billabong High International School, Thane" },
+      { lat: 19.2950, lng: 72.8700, name: "St. Francis High School, Mira Road" },
+      { lat: 19.2700, lng: 72.8600, name: "RBK Global School, Mira Bhayandar" },
+      { lat: 19.2400, lng: 73.1300, name: "Smt. Sulochanadevi Singhania School, Thane" },
+      { lat: 19.1800, lng: 72.9500, name: "Hiranandani Foundation School, Thane" },
+      { lat: 19.1000, lng: 73.0000, name: "EuroSchool, Thane" },
+      { lat: 19.2500, lng: 73.1500, name: "Saraswati Vidyalaya, Ulhasnagar" },
+      { lat: 19.3000, lng: 73.0500, name: "Podar International School, Kalyan" },
+      { lat: 19.2330, lng: 72.8560, name: "Seven Eleven Scholastic School, Mira Road" },
+      { lat: 19.2280, lng: 72.9700, name: "CP Goenka International School, Thane" },
+      { lat: 19.2970, lng: 72.8550, name: "N. L. Dalmia High School, Mira Road" },
+      { lat: 19.1500, lng: 72.9300, name: "Kanabai Pansare School" },
+      { lat: 19.2800, lng: 72.8800, name: "Mother Mary’s English High School, Mira Road" },
+      { lat: 19.2100, lng: 73.0900, name: "Vasant Vihar High School, Thane" },
+      { lat: 19.2600, lng: 73.0000, name: "New Horizon Public School, Thane" },
+      { lat: 19.225, lng: 72.965, name: "School X - Thane" },
+      { lat: 19.235, lng: 72.975, name: "School Y - Thane" },
+      { lat: 19.245, lng: 72.985, name: "School Z - Thane" },
+      { lat: 19.285, lng: 72.865, name: "School P - Mira Road" },
+      { lat: 19.275, lng: 72.875, name: "School Q - Mira Road" },
+    ];
+
+    schools.forEach(school => {
+      const marker = L.marker([school.lat, school.lng]);
+      marker.bindPopup(`<b>${school.name}</b>`);
+      markers.addLayer(marker);
+    });
+
+    map.addLayer(markers);
+
+    // Fix for partial map load on initial render
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 150);
+
+    window.addEventListener('resize', () => {
+      map.invalidateSize();
+    });
+
+    // Optional: zoom to fit all markers
+    // setTimeout(() => { map.fitBounds(markers.getBounds(), { padding: [50, 50] }); }, 300);
+  </script>
+</body>
+</html>
