@@ -5,6 +5,8 @@ import org.hibernate.StatelessSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -22,8 +24,10 @@ public class SpringSecurityConfiguration {
     @Bean
     public SecurityFilterChain  securityFilter (HttpSecurity http) throws Exception {
 
-         return http.csrf((req)->req.disable())
-                .authorizeRequests((requests) -> requests.requestMatchers("/user/**","/").permitAll().anyRequest().authenticated())
+         return http.csrf((req) -> req.disable())
+                 .authorizeHttpRequests((requests) -> requests.requestMatchers("/user/**", "/" ,"/api/rag/search/**" ,"/api/test/gemini" , "/api/test/ask" ,
+                         "/api/documents/upload/two"
+                         , "/api/embedding/test/**").permitAll().anyRequest().authenticated())
                  .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                  .sessionManagement((a)->a.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                  .build() ;
@@ -33,6 +37,11 @@ public class SpringSecurityConfiguration {
     @Bean
     public BCryptPasswordEncoder getEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 
 
