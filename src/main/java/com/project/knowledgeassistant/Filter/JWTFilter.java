@@ -33,25 +33,21 @@ public class JWTFilter extends OncePerRequestFilter {
         String email = null ;
 
         if (authToken != null && authToken.startsWith("Bearer ")) {
+            token = authToken.substring(7).trim();
+            try {
+                email = jwtUtility.extractEmail(token);
 
-            token = authToken.substring(7);
-            email = jwtUtility.extractEmail(token);
+                if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    UserDetails user = customUserDetailsService.loadUserByUsername(email);
 
-            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-                UserDetails user = customUserDetailsService.loadUserByUsername(email);
-
-                if(jwtUtility.checkTokenValidation(token, user.getUsername())) {
-
-                    UsernamePasswordAuthenticationToken mainToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-
-                    SecurityContextHolder.getContext().setAuthentication(mainToken);
+                    if (jwtUtility.validateToken(token, user.getUsername())) {
+                        UsernamePasswordAuthenticationToken mainToken = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
+                        SecurityContextHolder.getContext().setAuthentication(mainToken);
+                    }
                 }
-
+            } catch (Exception e) {
+                System.out.println("JWTFilter auth failed: " + e.getMessage());
             }
-
-
-
         }
 
         filterChain.doFilter(request, response);

@@ -1,9 +1,11 @@
 package com.project.knowledgeassistant.DTOs;
 
-import com.project.knowledgeassistant.enums.UserRoles;
-import lombok.Data;
-
 import java.time.LocalDateTime;
+import java.util.Set;
+
+import com.project.knowledgeassistant.enums.AccountStatus;
+
+import lombok.Data;
 
 @Data
 public class RegisterResponseDto {
@@ -11,6 +13,7 @@ public class RegisterResponseDto {
     private int id;
     private String username;
     private String email;
-    private UserRoles role;
+    private Set<String> roles;
+    private AccountStatus accountStatus;
     private LocalDateTime createdAt ;
 }

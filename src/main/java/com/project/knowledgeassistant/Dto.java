@@ -17,4 +17,5 @@ public class Dto {
     private boolean processed;         
     private int totalChunks;
     private LocalDateTime uploadDate;
+    private String uploadBy;
 }

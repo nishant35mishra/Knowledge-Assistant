@@ -1,19 +1,18 @@
 package com.project.knowledgeassistant.ExceptionHandler;
 
-import com.project.knowledgeassistant.CustomException.NotFound;
-import com.project.knowledgeassistant.CustomException.UserAlreadyExist;
-import com.project.knowledgeassistant.CustomException.somethingWentWrong;
+import java.util.HashMap;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.util.HashMap;
-import java.util.NoSuchElementException;
-
+import com.project.knowledgeassistant.CustomException.NotFound;
+import com.project.knowledgeassistant.CustomException.UserAlreadyExist;
+import com.project.knowledgeassistant.CustomException.somethingWentWrong;
+import org.springframework.security.access.AccessDeniedException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -57,6 +56,11 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 
+    }
+    
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<String> handleAccessDenied(AccessDeniedException ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN); // <-- Returns 403 Forbidden!
     }
 
 }
