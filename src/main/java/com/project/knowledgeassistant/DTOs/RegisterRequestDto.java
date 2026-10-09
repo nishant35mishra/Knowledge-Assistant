@@ -1,7 +1,8 @@
 package com.project.knowledgeassistant.DTOs;
 
-import com.project.knowledgeassistant.enums.UserRoles;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
@@ -19,6 +20,6 @@ public class RegisterRequestDto {
     @Email
     private String email;
 
-    @NotNull
-    private UserRoles role;
+    @NotBlank(message = "Requested role cannot be blank")
+    private String role;
 }
