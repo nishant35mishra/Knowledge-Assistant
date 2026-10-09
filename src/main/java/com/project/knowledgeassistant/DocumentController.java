@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,7 @@ import lombok.Data;
 public class DocumentController {
  private final DocumentMetaDataServiceImpl dms;
  
+ @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
  @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
  public ResponseEntity<Dto> upload(
          @RequestParam("file") MultipartFile file,
@@ -32,17 +34,20 @@ public class DocumentController {
      return ResponseEntity.status(HttpStatus.CREATED).body(response);
  }
  
+ @PreAuthorize("isAuthenticated()")
  @GetMapping
  public ResponseEntity<List<Dto>> getAll(){
 	 return ResponseEntity.ok(dms.getAllDocuments());
  }
  
+ @PreAuthorize("isAuthenticated()")
  @GetMapping("/{id}")
  public ResponseEntity<Dto> getById(@PathVariable String id){
 	 return ResponseEntity.ok(dms.getDocumentById(id));
 	 
  }
  
+ @PreAuthorize("hasRole('ADMIN')")
  @DeleteMapping("/{id}")
  public ResponseEntity<Dto> deleteDocument(@PathVariable String id){
 	 dms.delete(id);

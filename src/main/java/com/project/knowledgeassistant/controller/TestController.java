@@ -13,7 +13,7 @@ public class TestController {
     }
 
     @GetMapping("/test1")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public String TestController1(){
 
         return "success" ;
@@ -21,7 +21,7 @@ public class TestController {
     }
 
     @GetMapping("/test2")
-    @PreAuthorize("hasRole('ROLE_MANAGER')")
+    @PreAuthorize("hasRole('MANAGER')")
     public String TestController2(){
 
         return "success" ;
