@@ -80,7 +80,4 @@ public class UserController {
     public ResponseEntity<List<RegisterResponseDto>> getAllUsers() {
         return ResponseEntity.ok(userServices.getAllUsers());
     }
-
-
-
 }
