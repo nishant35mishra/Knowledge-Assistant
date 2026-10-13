@@ -1,18 +1,14 @@
 package com.project.knowledgeassistant.entities;
 
 
-import java.time.LocalDateTime;
-
 import com.project.knowledgeassistant.enums.DocumentAcessLevel;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.apache.commons.io.filefilter.FalseFileFilter;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -38,28 +34,31 @@ public class Document {
     @Column(nullable = false)
     private boolean processed = false;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private int totalChunks = 0;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     private int totalPages = 0;
 
     @Column(nullable = false)
     private LocalDateTime uploadDate = LocalDateTime.now();
 
-    @Column(nullable = false)
-    private String uploadBy = "System";
+    @JoinColumn (nullable = false , name = "uploadBy")
+    @ManyToOne(fetch = FetchType.LAZY )
+    private User uploadBy  ;
 
-    @Column(nullable = true)
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private DocumentAcessLevel acessLevel;
 
 
+    @Column(nullable = false)
     private String processedFileName;
 
-
+    @Column(nullable = false)
     private String processedFileType;
 
+    @Column(nullable = false)
     private String processedFilePath;
 
 
