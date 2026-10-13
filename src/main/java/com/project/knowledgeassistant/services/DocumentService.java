@@ -3,26 +3,32 @@ package com.project.knowledgeassistant.services;
 
 
 
-import com.project.knowledgeassistant.DTOs.*;
-import com.project.knowledgeassistant.entities.Document;
-import com.project.knowledgeassistant.enums.DocumentAcessLevel;
-import com.project.knowledgeassistant.repositories.DocumentRepository;
-import com.project.knowledgeassistant.repositories.UserRepository;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.Authentication;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.project.knowledgeassistant.DTOs.DocumentChunkData;
+import com.project.knowledgeassistant.DTOs.DocumentUploadResponse;
+import com.project.knowledgeassistant.DTOs.ExtractedPage;
+import com.project.knowledgeassistant.DTOs.OriginalDocument;
+import com.project.knowledgeassistant.DTOs.ProcessedDocument;
+import com.project.knowledgeassistant.entities.Document;
+import com.project.knowledgeassistant.enums.DocumentAcessLevel;
+import com.project.knowledgeassistant.repositories.DocumentRepository;
+import com.project.knowledgeassistant.repositories.UserRepository;
+
+import lombok.AllArgsConstructor;
 
 @Service
 @AllArgsConstructor

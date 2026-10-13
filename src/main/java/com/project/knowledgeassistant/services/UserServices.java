@@ -1,6 +1,7 @@
 package com.project.knowledgeassistant.services;
 
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -53,6 +54,7 @@ public class UserServices {
     
     private final RefreshTokenRepository refreshRepo;
 
+    private final TokenBlackListService tokenBlacklistService;
 
     public RegisterResponseDto  addUser(RegisterRequestDto dto){
 
@@ -117,13 +119,19 @@ public class UserServices {
          RefreshToken refreshToken = refreshService.createToken(user.getEmail());
          
           //  RegisterResponseDto response = requestMapper.RegisterResponseMapper(user.get());
-            return AuthResponseDto.builder().refreshToken(refreshToken.getToken()).accessToken(accessToken).email(user.getEmail())
-            		.userName(user.getUsername()).roles(roleNames).build();
+            return AuthResponseDto.builder().refreshToken(refreshToken.getToken()).accessToken(accessToken).build();
         }
     
     public String approveUser(int userId,String approverEmail) {
     	
     	User user = userRepository.findById(userId).orElseThrow(()-> new NotFound("User with id does not exist"));
+    	
+    	if(user.getAccountStatus()==AccountStatus.ACTIVE) {
+    		throw new RuntimeException("User "+user.getEmail()+" is already approved");
+    	}
+    	if(user.getAccountStatus()==AccountStatus.REJECTED) {
+    		throw new RuntimeException("User "+user.getEmail()+" is Rejected and cannot approved..");
+    	}
     	User approver = userRepository.findByEmail(approverEmail).orElseThrow(()-> new NotFound("Approver Not Found"));
     	
     	boolean isApproverAdmin = approver.getRoles().stream().anyMatch(r->"ROLE_ADMIN".equals(r.getRole()));
@@ -163,8 +171,7 @@ public class UserServices {
     	//for genereting new refresh toeken
     	String newAccessToken = jwtUtility.generateAccessToken(user.getUsername(), user.getEmail(), roles);
     	
-    	return AuthResponseDto.builder().refreshToken(token.getToken()).accessToken(newAccessToken).email(user.getEmail())
-        		.userName(user.getUsername()).roles(roles).build();
+    	return AuthResponseDto.builder().refreshToken(token.getToken()).accessToken(newAccessToken).build();
     }
     
     
@@ -190,6 +197,13 @@ public class UserServices {
     public String rejectUser(int userId,String approverEmail){
     	
     	User user = userRepository.findById(userId).orElseThrow(()-> new NotFound("User with the Id do not exist"));
+    	
+    	if (user.getAccountStatus() == AccountStatus.REJECTED) {
+            throw new RuntimeException("User " + user.getEmail() + " is already rejected.");
+        }
+        if (user.getAccountStatus() == AccountStatus.ACTIVE) {
+            throw new RuntimeException("User " + user.getEmail() + " is already approved/active and cannot be rejected.");
+        }
     	
     	User approverUser = userRepository.findByEmail(approverEmail).orElseThrow(()-> new NotFound("Approver with the email do not exist"));
     	
@@ -217,7 +231,21 @@ public class UserServices {
     }
     
     public void logOut(RefreshTokenRequestDto dto) {
+    	
     	refreshService.revokeToken(dto.getRefreshToken());
+    }
+    public void logOut(String accessToken, String refreshToken) {
+    	// Blacklist the access token in memory until its expiry
+    	if (accessToken != null) {
+    		Date expiration = jwtUtility.extractExpiration(accessToken);
+    		tokenBlacklistService.blackListedToken(accessToken, expiration);
+    	}
+    	
+        //  Revoke the refresh token in the database
+        if (refreshToken != null) {
+            refreshService.revokeToken(refreshToken);
+        }
+        
     }
     
     public List<RegisterResponseDto> getAllUsers() {

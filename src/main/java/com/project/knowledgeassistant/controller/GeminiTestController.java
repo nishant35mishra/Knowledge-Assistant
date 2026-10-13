@@ -1,13 +1,18 @@
 package com.project.knowledgeassistant.controller;
 
 
-import com.project.knowledgeassistant.DTOs.RagResponse;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.project.knowledgeassistant.DTOs.RagResponseGemini;
 import com.project.knowledgeassistant.DTOs.SearchRequest;
 import com.project.knowledgeassistant.services.GeminiService;
 import com.project.knowledgeassistant.services.RagService;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/test")

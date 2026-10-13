@@ -1,16 +1,16 @@
 package com.project.knowledgeassistant.services;
 
-import com.project.knowledgeassistant.DTOs.RagResponse;
-import com.project.knowledgeassistant.DTOs.RagResponseGemini;
-import com.project.knowledgeassistant.DTOs.RetrievedChunk;
-import com.project.knowledgeassistant.DTOs.SourceResponse;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.project.knowledgeassistant.DTOs.RagResponseGemini;
+import com.project.knowledgeassistant.DTOs.RetrievedChunk;
+import com.project.knowledgeassistant.DTOs.SourceResponse;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
