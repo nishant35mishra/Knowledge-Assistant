@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -69,9 +70,13 @@ public class UserController {
     }
     
     @PostMapping("/logout")
-    public ResponseEntity<String> logOut(@RequestBody @Valid RefreshTokenRequestDto dto){
-    	userServices.logOut(dto);
-    	return ResponseEntity.ok("You have been logged out");
+    public ResponseEntity<String> logOut(@RequestHeader(value = "Authorization",required = false) String authHeader, @RequestBody @Valid RefreshTokenRequestDto dto){
+    	String accessToken = null;
+    	if(authHeader != null && authHeader.startsWith("Bearer ")) {
+    		accessToken = authHeader.substring(7).trim();
+    	}
+    	userServices.logOut(accessToken,dto.getRefreshToken());
+    	return ResponseEntity.ok("You have been logged out Successfully...");
     	
     }
     

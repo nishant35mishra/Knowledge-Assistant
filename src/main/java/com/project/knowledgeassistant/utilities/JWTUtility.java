@@ -71,6 +71,11 @@ public class JWTUtility {
             return false;
         }
     }
+    
+    
+    public Date extractExpiration(String token) {
+    	return extractAllClaims(token).getExpiration();
+    }
 
 
 

@@ -3,6 +3,8 @@ package com.project.knowledgeassistant.configuration;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -20,20 +22,25 @@ public class SpringSecurityConfiguration {
     private JWTFilter jwtFilter;
 
     @Bean
-    public SecurityFilterChain securityFilter(HttpSecurity http) throws Exception {
-        return http.csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/add", "/user/login", "/user/refresh", "/").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .build();
+    SecurityFilterChain  securityFilter (HttpSecurity http) throws Exception {
+
+         return http.csrf((req) -> req.disable())
+                 .authorizeHttpRequests((requests) -> requests.requestMatchers("/user/add", "/user/login", "/user/refresh", "/", "/api/rag/search/**", "/api/test/gemini", "/api/test/ask", "/api/documents/upload/two", "/api/embedding/test/**").permitAll()
+                		 .anyRequest().authenticated())
+                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                 .sessionManagement((a)->a.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                 .build() ;
+
     }
 
     @Bean
-    public BCryptPasswordEncoder getEncoder() {
+     BCryptPasswordEncoder getEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+     AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 
 
