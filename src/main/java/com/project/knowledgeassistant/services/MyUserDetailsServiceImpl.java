@@ -1,7 +1,8 @@
 package com.project.knowledgeassistant.services;
 
-import com.project.knowledgeassistant.entities.MyUser;
-import com.project.knowledgeassistant.repositories.UserRepository;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,10 +12,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.Optional;
+import com.project.knowledgeassistant.enums.AccountStatus;
+import com.project.knowledgeassistant.repositories.UserRepository;
+
+import jakarta.transaction.Transactional;
 
 @Service
+@Transactional
 public class MyUserDetailsServiceImpl implements UserDetailsService {
 
     @Autowired
@@ -23,16 +27,27 @@ public class MyUserDetailsServiceImpl implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        Optional<MyUser> myuser  = userRepository.findByEmail(email);
-        MyUser user1 = myuser.get() ;
+    	com.project.knowledgeassistant.entities.User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    	
 
-        ArrayList<GrantedAuthority> list = new ArrayList<>();
-        list.add(new SimpleGrantedAuthority(user1.getRole().toString())) ;
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        if(user.getRoles() != null) {
+        	user.getRoles().forEach(role->{
+        		String roleName = role.getRole();
+        		if(roleName != null && !roleName.startsWith("ROLE_")) {
+        			roleName = "ROLE_" + roleName;
+        		}
+        		authorities.add(new SimpleGrantedAuthority(roleName));
+        	});
+        }
+        
 
         return User.builder()
-                .username(user1.getEmail())
-                .password(user1.getPassword())
-                .authorities(list)
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .authorities(authorities)
+                .disabled(user.getAccountStatus() != AccountStatus.ACTIVE)
                 .build() ;
     }
 }

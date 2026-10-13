@@ -25,8 +25,8 @@ public class SpringSecurityConfiguration {
     public SecurityFilterChain  securityFilter (HttpSecurity http) throws Exception {
 
          return http.csrf((req) -> req.disable())
-                 .authorizeHttpRequests((requests) -> requests.requestMatchers("/user/**", "/" ,"/api/rag/search/**" ,"/api/test/gemini" , "/api/test/ask" ,
-                         "/api/documents/upload/two"
+                 .authorizeHttpRequests((requests) -> requests.requestMatchers("/user/**", "/" , "/user/add" , "/user/logino" ,"/api/rag/search/**" ,"/api/test/gemini" , "/api/test/ask"
+//                         "/api/documents/upload/two"
                          , "/api/embedding/test/**").permitAll().anyRequest().authenticated())
                  .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                  .sessionManagement((a)->a.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -1,14 +1,21 @@
 package com.project.knowledgeassistant.repositories;
 
-import com.project.knowledgeassistant.entities.MyUser;
-import org.springframework.data.jpa.repository.JpaRepository;
-
+import java.util.List;
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<MyUser,Integer> {
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import com.project.knowledgeassistant.entities.User;
+import com.project.knowledgeassistant.enums.AccountStatus;
 
 
-    public Optional<MyUser> findByEmail(String email);
+@Repository
+public interface UserRepository extends JpaRepository<User,Integer> {
 
 
+    Optional<User> findByEmail(String email);
+
+
+    List<User> findByAccountStatus(AccountStatus accountStatus);
 }
