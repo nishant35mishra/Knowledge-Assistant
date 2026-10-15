@@ -48,7 +48,7 @@ public class ChunkingService {
                     chunks.add(
                             new DocumentChunkData(
                                     chunk,
-                                    page.pageNumber(),
+//                                    page.pageNumber(),
                                     globalChunkNumber++
                             )
                     );
@@ -61,4 +61,44 @@ public class ChunkingService {
 
         return chunks;
     }
+
+
+    public List<DocumentChunkData> createChunksWithOverlap(
+            String text ) {
+
+        List<DocumentChunkData> chunks =
+                new ArrayList<>();
+
+        int globalChunkNumber = 0;
+
+        int start = 0;
+
+        while (start < text.length()) {
+
+            int end = Math.min(
+                    start + CHUNK_SIZE,
+                    text.length()
+            );
+
+            String chunk =
+                    text.substring(start, end).trim();
+
+            if (!chunk.isEmpty()) {
+
+                chunks.add(
+                        new DocumentChunkData(
+                                chunk,
+                                globalChunkNumber++
+                        )
+                );
+            }
+
+            start +=
+                    CHUNK_SIZE - OVERLAP_SIZE;
+        }
+
+        return chunks;
+    }
+
+
 }
