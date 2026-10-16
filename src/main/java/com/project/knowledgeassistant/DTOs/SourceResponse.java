@@ -11,6 +11,5 @@ public class SourceResponse {
 
     String documentId ;
     String fileName ;
-    Integer pageNumber ;
     Integer chunkNumber ;
 }

@@ -18,17 +18,19 @@ public class DocumentResponse {
     private String filePath ;
     private String fileType;
     private boolean processed;
-    private int totalPages;
     private Long fileSize;
-
-    private String processedFileName;
-    private String processedFileType;
-    private String processedFilePath;
     private int totalChunks;
-    private RegisterResponseDto registerResponseDto ;
-
     private DocumentAcessLevel documentAcessLevel;
     private LocalDateTime uploadDate;
+    private RegisterResponseDto registerResponseDto ;
+
+
+
+    //    private int totalPages
+    //    private String processedFileName;
+//    private String processedFileType;
+//    private String processedFilePath;
+
 
 
 }

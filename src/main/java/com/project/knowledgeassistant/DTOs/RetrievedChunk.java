@@ -12,7 +12,7 @@ public class RetrievedChunk {
     private String content;
     private String documentId;
     private String fileName;
-    private Integer pageNumber;
+//    private Integer pageNumber;
     private Integer chunkNumber;
-    private Double score ;
+
 }

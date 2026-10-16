@@ -4,7 +4,6 @@ package com.project.knowledgeassistant.controller;
 
 import com.project.knowledgeassistant.DTOs.DocumentResponse;
 import com.project.knowledgeassistant.DTOs.DocumentUploadResponse;
-import com.project.knowledgeassistant.entities.Document;
 import com.project.knowledgeassistant.enums.DocumentAcessLevel;
 import com.project.knowledgeassistant.services.DocumentService;
 import lombok.AllArgsConstructor;
@@ -30,9 +29,25 @@ public class DocumentController {
     private final DocumentService documentService;
 
 
+
     @PostMapping("/upload/")
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN','MANAGER')")
     public ResponseEntity<DocumentUploadResponse> uploadDocument(
+            @RequestParam("file") MultipartFile file , @RequestParam(value = "accessLevel", defaultValue = "PUBLIC") DocumentAcessLevel accessLevel ) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        DocumentUploadResponse response =
+                documentService.uploadDocument(file,authentication.getName(),accessLevel);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(response);
+    }
+
+    @PostMapping("/upload2/")
+    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN','MANAGER')")
+    public ResponseEntity<DocumentUploadResponse> uploadDocument2(
             @RequestParam("file") MultipartFile file , @RequestParam(value = "accessLevel", defaultValue = "PUBLIC") DocumentAcessLevel accessLevel ) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -49,8 +64,9 @@ public class DocumentController {
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN','MANAGER','PUBLIC')")
     public ResponseEntity<DocumentResponse> getDocumentById(@PathVariable String id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String role = authentication.getAuthorities().iterator().next().toString();
 
-        DocumentResponse response = documentService.getDocumentById(id,authentication.getName());
+        DocumentResponse response = documentService.getDocumentById(id,role);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -61,8 +77,9 @@ public class DocumentController {
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN','MANAGER')")
     public ResponseEntity<List<DocumentResponse>> getAllDocuments() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String role = authentication.getAuthorities().iterator().next().toString();
 
-        List<DocumentResponse> response = documentService.getAllDocuments(authentication.getName());
+        List<DocumentResponse> response = documentService.getAllDocuments(role);
 
 
         return ResponseEntity
@@ -73,9 +90,11 @@ public class DocumentController {
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasAnyRole('ADMIN','MANAGER')")
     public ResponseEntity<String> deleteDocumentById(@PathVariable String id) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-         documentService.deleteDocumentById(id,authentication.getName());
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String role = authentication.getAuthorities().iterator().next().toString();
+
+         documentService.deleteDocumentById(id,role);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

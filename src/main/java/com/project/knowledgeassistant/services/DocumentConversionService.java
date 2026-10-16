@@ -64,7 +64,7 @@ public class DocumentConversionService {
             Path pdfPath = outputDirectory.resolve(pdfFileName);
 
             ProcessedDocument processedDocument = new ProcessedDocument();
-            processedDocument.setProcessedFileName(fileName);
+            processedDocument.setProcessedFileName(pdfFileName);
             processedDocument.setProcessedFilePath(pdfPath);
             processedDocument.setProcessedFileType("application/pdf");
 

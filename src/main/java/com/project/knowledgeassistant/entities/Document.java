@@ -44,8 +44,8 @@ public class Document {
     @Column(nullable = false)
     private int totalChunks = 0;
 
-    @Column(nullable = false)
-    private int totalPages = 0;
+//    @Column(nullable = true)
+//    private int totalPages = 0;
 
     @Column(nullable = false)
     private LocalDateTime uploadDate = LocalDateTime.now();
@@ -59,14 +59,14 @@ public class Document {
     private DocumentAcessLevel acessLevel;
 
 
-    @Column(nullable = false)
-    private String processedFileName;
-
-    @Column(nullable = false)
-    private String processedFileType;
-
-    @Column(nullable = false)
-    private String processedFilePath;
+//    @Column(nullable = true)
+//    private String processedFileName;
+//
+//    @Column(nullable = true)
+//    private String processedFileType;
+//
+//    @Column(nullable = true)
+//    private String processedFilePath;
 
 
     public Document() {
