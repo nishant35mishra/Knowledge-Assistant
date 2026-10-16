@@ -1,7 +1,5 @@
 package com.project.knowledgeassistant.configuration;
 
-import com.project.knowledgeassistant.Filter.JWTFilter;
-import org.hibernate.StatelessSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,6 +12,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.project.knowledgeassistant.Filter.JWTFilter;
+
 @Configuration
 @EnableMethodSecurity
 public class SpringSecurityConfiguration {
@@ -22,7 +22,7 @@ public class SpringSecurityConfiguration {
     private JWTFilter jwtFilter;
 
     @Bean
-    public SecurityFilterChain  securityFilter (HttpSecurity http) throws Exception {
+    SecurityFilterChain  securityFilter (HttpSecurity http) throws Exception {
 
          return http.csrf((req) -> req.disable())
                  .authorizeHttpRequests((requests) -> requests.requestMatchers("/user/**", "/" , "/user/add" , "/user/logino" ,"/api/rag/search/**" ,"/api/test/gemini" , "/api/test/ask"
@@ -35,12 +35,12 @@ public class SpringSecurityConfiguration {
     }
 
     @Bean
-    public BCryptPasswordEncoder getEncoder() {
+    BCryptPasswordEncoder getEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
 

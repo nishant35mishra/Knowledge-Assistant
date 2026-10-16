@@ -76,7 +76,7 @@ public class UserServices {
         
         Role role = roleRepository.findByRole(requestedRole).orElseThrow(()->new NotFound("Role not found in database"));
         
-        User myUser = requestMapper.RegisterRequestMapper(dto) ;
+        User myUser = requestMapper.registerRequestMapper(dto) ;
         myUser.setPassword(getEncoder.encode(dto.getPassword()));
         
         Set<Role> roles = new HashSet<>();
@@ -92,7 +92,7 @@ public class UserServices {
 
       User user =   userRepository.save(myUser) ;
 
-        RegisterResponseDto response = requestMapper.RegisterResponseMapper(user) ;
+        RegisterResponseDto response = requestMapper.registerResponseMapper(user) ;
 
         return response  ;
 
@@ -185,10 +185,10 @@ public class UserServices {
     	List<User> pendingUsers = userRepository.findByAccountStatus(AccountStatus.PENDING_APPROVAL);
     	
     	if(isAdmin) {
-    		return pendingUsers.stream().map(requestMapper::RegisterResponseMapper).collect(Collectors.toList());
+    		return pendingUsers.stream().map(requestMapper::registerResponseMapper).collect(Collectors.toList());
     	}
     	else if(isManager) {
-    		return pendingUsers.stream().filter(u->u.getRoles().stream().anyMatch(r->"ROLE_EMPLOYEE".equals(r.getRole()))).map(requestMapper::RegisterResponseMapper)
+    		return pendingUsers.stream().filter(u->u.getRoles().stream().anyMatch(r->"ROLE_EMPLOYEE".equals(r.getRole()))).map(requestMapper::registerResponseMapper)
     				.collect(Collectors.toList());
     	}
     	return List.of();
@@ -248,9 +248,32 @@ public class UserServices {
         
     }
     
+    public void logOut(String accessToken, int id) {
+    	
+    	User user = userRepository.findById(id).orElseThrow(()->new NotFound("User with the id does not exist.."));
+    	// Blacklist the access token in memory until its expiry
+    	if(accessToken == null) {
+    		throw new RuntimeException("Authorization access token is required for logout");
+    	}
+    	String emailFromToken = jwtUtility.extractEmail(accessToken);
+    	if(emailFromToken == null || !emailFromToken.equals(user.getEmail())) {
+    		throw new RuntimeException("You can only logout yourself!!");
+    	}
+    	
+    	//black list the token in memory until its natural expiry
+    		Date expiration = jwtUtility.extractExpiration(accessToken);
+    		tokenBlacklistService.blackListedToken(accessToken, expiration);
+    	
+    	//revoke the users refresh token in db
+    	refreshService.revokeToken(user);
+    	
+        
+        
+    }
+    
     public List<RegisterResponseDto> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(requestMapper::RegisterResponseMapper)
+                .map(requestMapper::registerResponseMapper)
                 .collect(Collectors.toList());
     }
 

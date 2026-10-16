@@ -55,4 +55,10 @@ public class RefreshTokenService {
 		rToken.setRevoked(true);
 		refreshRepo.save(rToken);
 	}
+	public void revokeToken(User user) {
+	 refreshRepo.findByUser(user).
+				ifPresent(r-> {r.setRevoked(true);
+				refreshRepo.save(r);});
+		
+	}
 }

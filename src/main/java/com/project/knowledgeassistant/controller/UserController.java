@@ -80,6 +80,17 @@ public class UserController {
     	
     }
     
+    @PostMapping("/logout/{id}")
+    public ResponseEntity<String> logOut(@RequestHeader(value = "Authorization",required = false) String authHeader, @PathVariable int id){
+    	String accessToken = null;
+    	if(authHeader != null && authHeader.startsWith("Bearer ")) {
+    		accessToken = authHeader.substring(7).trim();
+    	}
+    	userServices.logOut(accessToken,id);
+    	return ResponseEntity.ok("You have been logged out Successfully...");
+    	
+    }
+    
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping
     public ResponseEntity<List<RegisterResponseDto>> getAllUsers() {
