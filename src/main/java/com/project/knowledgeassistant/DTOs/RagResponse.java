@@ -1,11 +1,10 @@
 package com.project.knowledgeassistant.DTOs;
 
+import java.util.List;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Data
 @AllArgsConstructor

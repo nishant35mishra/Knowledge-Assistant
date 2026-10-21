@@ -1,13 +1,8 @@
 package com.project.knowledgeassistant.DTOs;
 
-import com.project.knowledgeassistant.entities.User;
-import com.project.knowledgeassistant.enums.DocumentAcessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @AllArgsConstructor
 @Data

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 
+import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import com.project.knowledgeassistant.enums.AccountStatus;
@@ -30,6 +31,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+
 
 public class User {
 

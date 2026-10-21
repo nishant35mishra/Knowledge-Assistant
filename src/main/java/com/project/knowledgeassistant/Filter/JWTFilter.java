@@ -1,11 +1,7 @@
-package com.project.knowledgeassistant.Filter;
+package com.project.knowledgeassistant.filter;
 
-import com.project.knowledgeassistant.services.MyUserDetailsServiceImpl;
-import com.project.knowledgeassistant.utilities.JWTUtility;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,17 +9,27 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import java.io.IOException;
+import com.project.knowledgeassistant.services.MyUserDetailsServiceImpl;
+import com.project.knowledgeassistant.services.TokenBlackListService;
+import com.project.knowledgeassistant.utilities.JWTUtility;
+
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 
 @Component
 public class JWTFilter extends OncePerRequestFilter {
 
     @Autowired
-    JWTUtility jwtUtility;
+    private JWTUtility jwtUtility;
 
     @Autowired
-    MyUserDetailsServiceImpl customUserDetailsService;
+    private MyUserDetailsServiceImpl customUserDetailsService;
+    
+    @Autowired
+    private TokenBlackListService tokenBlacklistService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -34,6 +40,12 @@ public class JWTFilter extends OncePerRequestFilter {
 
         if (authToken != null && authToken.startsWith("Bearer ")) {
             token = authToken.substring(7).trim();
+            if (tokenBlacklistService.isBlackListed(token)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\": \"Token has been revoked. Please log in again.\"}");
+                return; // Halt filter chain
+            }
             try {
                 email = jwtUtility.extractEmail(token);
 
@@ -54,4 +66,6 @@ public class JWTFilter extends OncePerRequestFilter {
 
 
     }
+    
+    
 }
