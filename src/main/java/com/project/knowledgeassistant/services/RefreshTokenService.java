@@ -5,9 +5,11 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.project.knowledgeassistant.CustomException.NotFound;
+import com.project.knowledgeassistant.customexception.AppException;
+import com.project.knowledgeassistant.customexception.NotFound;
 import com.project.knowledgeassistant.entities.RefreshToken;
 import com.project.knowledgeassistant.entities.User;
+import com.project.knowledgeassistant.enums.SystemCode;
 import com.project.knowledgeassistant.repositories.RefreshTokenRepository;
 import com.project.knowledgeassistant.repositories.UserRepository;
 
@@ -26,7 +28,7 @@ public class RefreshTokenService {
 	private final UserRepository userRepo;
 	
 	public RefreshToken createToken(String email) {
-		User user = userRepo.findByEmail(email).orElseThrow(()-> new NotFound("User not found with this email"));
+		User user = userRepo.findByEmail(email).orElseThrow(()-> new NotFound(SystemCode.AUTH_USER_NOT_FOUND, "User not found with email: " + email));
 		
 		RefreshToken token = refreshRepo.findByUser(user).orElse(new RefreshToken());
 		//refreshRepo.deleteByUser(user);
@@ -45,13 +47,13 @@ public class RefreshTokenService {
 	public RefreshToken verifyExpiration(RefreshToken token) {
 		if(token.isRevoked() || token.getExpiryDate().isBefore(Instant.now())) {
 				refreshRepo.delete(token);
-				throw new RuntimeException("Refresh token was expired or revoked pls signin again....");
+				throw new AppException(SystemCode.AUTH_TOKEN_EXPIRED_OR_REVOKED, "Refresh token was expired or revoked, please sign in again");
 		}
 		return token;
 	}
 	
 	public void revokeToken(String token) {
-		RefreshToken rToken = refreshRepo.findByToken(token).orElseThrow(()-> new NotFound("Token does not found"));
+		RefreshToken rToken = refreshRepo.findByToken(token).orElseThrow(()-> new NotFound(SystemCode.AUTH_TOKEN_EXPIRED_OR_REVOKED, "Token not found"));
 		rToken.setRevoked(true);
 		refreshRepo.save(rToken);
 	}

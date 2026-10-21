@@ -11,18 +11,20 @@ import java.util.stream.Collectors;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import com.project.knowledgeassistant.CustomException.NotFound;
-import com.project.knowledgeassistant.CustomException.UserAlreadyExist;
 import com.project.knowledgeassistant.DTOs.AuthResponseDto;
 import com.project.knowledgeassistant.DTOs.LoginDto;
 import com.project.knowledgeassistant.DTOs.RefreshTokenRequestDto;
 import com.project.knowledgeassistant.DTOs.RegisterRequestDto;
 import com.project.knowledgeassistant.DTOs.RegisterResponseDto;
-import com.project.knowledgeassistant.ObjectMapper.RegisterRequestMapper;
+import com.project.knowledgeassistant.customexception.AppException;
+import com.project.knowledgeassistant.customexception.NotFound;
+import com.project.knowledgeassistant.customexception.UserAlreadyExist;
 import com.project.knowledgeassistant.entities.RefreshToken;
 import com.project.knowledgeassistant.entities.Role;
 import com.project.knowledgeassistant.entities.User;
 import com.project.knowledgeassistant.enums.AccountStatus;
+import com.project.knowledgeassistant.enums.SystemCode;
+import com.project.knowledgeassistant.objectmapper.RegisterRequestMapper;
 import com.project.knowledgeassistant.repositories.RefreshTokenRepository;
 import com.project.knowledgeassistant.repositories.RoleRepository;
 import com.project.knowledgeassistant.repositories.UserRepository;
@@ -62,19 +64,17 @@ public class UserServices {
         Optional<User> optUser  = userRepository.findByEmail(dto.getEmail());
         if(optUser.isPresent()){
 
-            throw new UserAlreadyExist("User already exist with email"+dto.getEmail());
+            throw new UserAlreadyExist(SystemCode.AUTH_USER_ALREADY_EXISTS, "User already exists with email: " + dto.getEmail());
         }
 
-        String requestedRole = dto.getRole().trim().toUpperCase();
-        if(!requestedRole.startsWith("ROLE_")) {
-        	requestedRole = "ROLE_"+requestedRole;
-        }
+        String rawRole = dto.getRole().trim().toUpperCase();
+        final String requestedRole = rawRole.startsWith("ROLE_") ? rawRole : "ROLE_" + rawRole;
         
         if(requestedRole.equals("ROLE_ADMIN")) {
-        	throw new RuntimeException("USER CAN NOT SELECT ITSELF AS ADMIN");
+        	throw new AppException(SystemCode.AUTH_SELF_ADMIN_FORBIDDEN, "Users cannot register themselves as ADMIN");
         }
         
-        Role role = roleRepository.findByRole(requestedRole).orElseThrow(()->new NotFound("Role not found in database"));
+        Role role = roleRepository.findByRole(requestedRole).orElseThrow(()->new NotFound(SystemCode.AUTH_ROLE_NOT_FOUND, "Role not found in database: " + requestedRole));
         
         User myUser = requestMapper.registerRequestMapper(dto) ;
         myUser.setPassword(getEncoder.encode(dto.getPassword()));
@@ -100,14 +100,14 @@ public class UserServices {
 
     public AuthResponseDto getUser(LoginDto dto) {
 
-        User user = userRepository.findByEmail(dto.getEmail()).orElseThrow(()-> new NotFound("User Not Found"));
+        User user = userRepository.findByEmail(dto.getEmail()).orElseThrow(()-> new NotFound(SystemCode.AUTH_USER_NOT_FOUND, "User not found with email: " + dto.getEmail()));
         
         if(!getEncoder.matches(dto.getPassword(),user.getPassword())){
-        	throw new RuntimeException("Ivalid Password");
+        	throw new AppException(SystemCode.AUTH_INVALID_CREDENTIALS, "Invalid password");
         }
 
         if(user.getAccountStatus() != AccountStatus.ACTIVE){
-        	throw new RuntimeException("Account is not active..\n Current Status : "+user.getAccountStatus());
+        	throw new AppException(SystemCode.AUTH_ACCOUNT_NOT_ACTIVE, "Account is not active. Current status: " + user.getAccountStatus());
         }
          
 
@@ -124,15 +124,15 @@ public class UserServices {
     
     public String approveUser(int userId,String approverEmail) {
     	
-    	User user = userRepository.findById(userId).orElseThrow(()-> new NotFound("User with id does not exist"));
+    	User user = userRepository.findById(userId).orElseThrow(()-> new NotFound(SystemCode.AUTH_USER_NOT_FOUND, "User with ID does not exist"));
     	
     	if(user.getAccountStatus()==AccountStatus.ACTIVE) {
-    		throw new RuntimeException("User "+user.getEmail()+" is already approved");
+    		throw new AppException(SystemCode.SYS_BAD_REQUEST, "User "+user.getEmail()+" is already approved");
     	}
     	if(user.getAccountStatus()==AccountStatus.REJECTED) {
-    		throw new RuntimeException("User "+user.getEmail()+" is Rejected and cannot approved..");
+    		throw new AppException(SystemCode.SYS_BAD_REQUEST, "User "+user.getEmail()+" is Rejected and cannot be approved");
     	}
-    	User approver = userRepository.findByEmail(approverEmail).orElseThrow(()-> new NotFound("Approver Not Found"));
+    	User approver = userRepository.findByEmail(approverEmail).orElseThrow(()-> new NotFound(SystemCode.AUTH_USER_NOT_FOUND, "Approver Not Found"));
     	
     	boolean isApproverAdmin = approver.getRoles().stream().anyMatch(r->"ROLE_ADMIN".equals(r.getRole()));
     	boolean isApproverManager = approver.getRoles().stream()
@@ -144,11 +144,11 @@ public class UserServices {
                 .anyMatch(r -> "ROLE_EMPLOYEE".equals(r.getRole()));
         
         if(targetIsManager && !isApproverAdmin) {
-        	throw new RuntimeException("Only an ADMIN can approve a MANAGER account!");
+        	throw new AppException(SystemCode.AUTH_APPROVAL_FORBIDDEN, "Only an ADMIN can approve a MANAGER account!");
         }
         
         if (targetIsEmployee && !isApproverManager && !isApproverAdmin) {
-            throw new RuntimeException("Only a MANAGER or ADMIN can approve an EMPLOYEE account!");
+            throw new AppException(SystemCode.AUTH_APPROVAL_FORBIDDEN, "Only a MANAGER or ADMIN can approve an EMPLOYEE account!");
         }
         
         user.setAccountStatus(AccountStatus.ACTIVE);
@@ -196,16 +196,16 @@ public class UserServices {
    
     public String rejectUser(int userId,String approverEmail){
     	
-    	User user = userRepository.findById(userId).orElseThrow(()-> new NotFound("User with the Id do not exist"));
+    	User user = userRepository.findById(userId).orElseThrow(()-> new NotFound(SystemCode.AUTH_USER_NOT_FOUND, "User with the ID does not exist"));
     	
     	if (user.getAccountStatus() == AccountStatus.REJECTED) {
-            throw new RuntimeException("User " + user.getEmail() + " is already rejected.");
+            throw new AppException(SystemCode.SYS_BAD_REQUEST, "User " + user.getEmail() + " is already rejected.");
         }
         if (user.getAccountStatus() == AccountStatus.ACTIVE) {
-            throw new RuntimeException("User " + user.getEmail() + " is already approved/active and cannot be rejected.");
+            throw new AppException(SystemCode.SYS_BAD_REQUEST, "User " + user.getEmail() + " is already approved/active and cannot be rejected.");
         }
     	
-    	User approverUser = userRepository.findByEmail(approverEmail).orElseThrow(()-> new NotFound("Approver with the email do not exist"));
+    	User approverUser = userRepository.findByEmail(approverEmail).orElseThrow(()-> new NotFound(SystemCode.AUTH_USER_NOT_FOUND, "Approver with the email does not exist"));
     	
     	boolean isApproverAdmin = approverUser.getRoles().stream()
                 .anyMatch(r -> "ROLE_ADMIN".equals(r.getRole()));
@@ -217,11 +217,11 @@ public class UserServices {
                 .anyMatch(r -> "ROLE_EMPLOYEE".equals(r.getRole()));
         
         if(targetIsManager && !isApproverAdmin) {
-        	throw new RuntimeException("only an ADMIN can reject a MANAGER account..");
+        	throw new AppException(SystemCode.AUTH_APPROVAL_FORBIDDEN, "Only an ADMIN can reject a MANAGER account!");
         }
         
         if(targetIsEmployee && !isApproverAdmin && !isApproverManager) {
-        	throw new RuntimeException("only a ADMIN or MANAGER can reject an EMPLOYEE account..");
+        	throw new AppException(SystemCode.AUTH_APPROVAL_FORBIDDEN, "Only an ADMIN or MANAGER can reject an EMPLOYEE account!");
         }
         
         user.setAccountStatus(AccountStatus.REJECTED);
@@ -250,14 +250,14 @@ public class UserServices {
     
     public void logOut(String accessToken, int id) {
     	
-    	User user = userRepository.findById(id).orElseThrow(()->new NotFound("User with the id does not exist.."));
+    	User user = userRepository.findById(id).orElseThrow(()->new NotFound(SystemCode.AUTH_USER_NOT_FOUND, "User with the ID does not exist"));
     	// Blacklist the access token in memory until its expiry
     	if(accessToken == null) {
-    		throw new RuntimeException("Authorization access token is required for logout");
+    		throw new AppException(SystemCode.AUTH_TOKEN_EXPIRED_OR_REVOKED, "Authorization access token is required for logout");
     	}
     	String emailFromToken = jwtUtility.extractEmail(accessToken);
     	if(emailFromToken == null || !emailFromToken.equals(user.getEmail())) {
-    		throw new RuntimeException("You can only logout yourself!!");
+    		throw new AppException(SystemCode.AUTH_ACCESS_DENIED, "You can only logout yourself!");
     	}
     	
     	//black list the token in memory until its natural expiry

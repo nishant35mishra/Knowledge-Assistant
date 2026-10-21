@@ -1,4 +1,4 @@
-package com.project.knowledgeassistant.Filter;
+package com.project.knowledgeassistant.filter;
 
 import java.io.IOException;
 

@@ -1,4 +1,4 @@
-package com.project.knowledgeassistant.ObjectMapper;
+package com.project.knowledgeassistant.objectmapper;
 
 import java.util.stream.Collectors;
 

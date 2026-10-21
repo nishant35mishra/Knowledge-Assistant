@@ -12,7 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-import com.project.knowledgeassistant.Filter.JWTFilter;
+import com.project.knowledgeassistant.filter.JWTFilter;
 
 @Configuration
 @EnableMethodSecurity
