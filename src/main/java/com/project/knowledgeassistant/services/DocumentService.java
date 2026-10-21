@@ -1,28 +1,36 @@
 package com.project.knowledgeassistant.services;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
-
-
-
-import com.project.knowledgeassistant.CustomException.NotFound;
-import com.project.knowledgeassistant.DTOs.*;
+import com.project.knowledgeassistant.DTOs.DocumentChunkData;
+import com.project.knowledgeassistant.DTOs.DocumentResponse;
+import com.project.knowledgeassistant.DTOs.DocumentUploadResponse;
+import com.project.knowledgeassistant.DTOs.OriginalDocument;
+import com.project.knowledgeassistant.DTOs.RegisterResponseDto;
+import com.project.knowledgeassistant.customexception.AppException;
+import com.project.knowledgeassistant.customexception.NotFound;
 import com.project.knowledgeassistant.entities.Document;
 import com.project.knowledgeassistant.entities.Role;
 import com.project.knowledgeassistant.entities.User;
 import com.project.knowledgeassistant.enums.DocumentAcessLevel;
+import com.project.knowledgeassistant.enums.SystemCode;
 import com.project.knowledgeassistant.repositories.DocumentRepository;
 import com.project.knowledgeassistant.repositories.UserRepository;
+
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -78,7 +86,8 @@ public class DocumentService {
             if (extractedText == null ||
                     extractedText.isBlank()) {
 
-                throw new IllegalArgumentException(
+                throw new AppException(
+                        SystemCode.DOC_EMPTY_FILE,
                         "No readable text found in document"
                 );
             }
@@ -216,7 +225,8 @@ public class DocumentService {
     private void validateFile(MultipartFile file) {
 
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException(
+            throw new AppException(
+                    SystemCode.DOC_EMPTY_FILE,
                     "File cannot be empty"
             );
         }
@@ -225,15 +235,16 @@ public class DocumentService {
     private void validateFileType(String fileType) {
 
         if (!ALLOWED_FILE_TYPES.contains(fileType)) {
-            throw new IllegalArgumentException(
-                    "Unsupported file type: " + fileType
+            throw new AppException(
+                    SystemCode.DOC_INVALID_FILE_TYPE,
+                    "File type not supported. Only PDF, DOCX and TXT are allowed."
             );
         }
     }
 
     public DocumentResponse getDocumentById(String id , String role) {
 
-        Document document = documentRepository.findById(id).orElseThrow(()-> new NotFound("Document not found"));
+        Document document = documentRepository.findById(id).orElseThrow(()-> new NotFound(SystemCode.DOC_NOT_FOUND, "Document not found with the given ID"));
 
         String userRole = role.substring(5) ;
         DocumentAcessLevel acessLevel = document.getAcessLevel();
@@ -249,7 +260,7 @@ public class DocumentService {
                 return getDocumentResponse(document);
             }else {
 
-                throw new IllegalArgumentException("invalid acess level");
+                throw new AppException(SystemCode.DOC_ACCESS_DENIED, "Access denied: your role is not authorized to view this document");
             }
         } else if (userRole.equals("PUBLIC")) {
 
@@ -257,7 +268,7 @@ public class DocumentService {
             if(isvalid){
                 return getDocumentResponse(document);
             }else  {
-                throw new IllegalArgumentException("invalid acess level");
+                throw new AppException(SystemCode.DOC_ACCESS_DENIED, "Access denied: your role is not authorized to view this document");
             }
 
         } else {
@@ -266,7 +277,7 @@ public class DocumentService {
             if (isvalid){
                 return getDocumentResponse(document);
             }
-            else {throw new IllegalArgumentException("Invalid acess level");}
+            else {throw new AppException(SystemCode.DOC_ACCESS_DENIED, "Access denied: your role is not authorized to view this document");}
         }
 
 
@@ -316,7 +327,7 @@ public class DocumentService {
     @Transactional
     public Void  deleteDocumentById(String id , String role) {
 
-        Document document = documentRepository.findById(id).orElseThrow(()-> new NotFound("Document not found"));
+        Document document = documentRepository.findById(id).orElseThrow(()-> new NotFound(SystemCode.DOC_NOT_FOUND, "Document not found with the given ID"));
 
 
             if(role.equals("ROLE_ADMIN")){
@@ -330,7 +341,7 @@ public class DocumentService {
             }else {
 
                 if(document.getAcessLevel().equals(DocumentAcessLevel.ADMIN)){
-                    throw new IllegalArgumentException("invalid acess level");
+                    throw new AppException(SystemCode.DOC_ACCESS_DENIED, "Access denied: managers cannot delete ADMIN documents");
                 }else {
                     try{
                         deletePhysicalFileAndDocumentChunks(document.getFilePath(), document.getId());

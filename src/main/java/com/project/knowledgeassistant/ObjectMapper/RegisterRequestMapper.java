@@ -1,4 +1,4 @@
-package com.project.knowledgeassistant.ObjectMapper;
+package com.project.knowledgeassistant.objectmapper;
 
 import java.util.stream.Collectors;
 
@@ -12,7 +12,7 @@ import com.project.knowledgeassistant.entities.User;
 @Component
 public class RegisterRequestMapper {
 
-    public User RegisterRequestMapper(RegisterRequestDto dto) {
+    public User registerRequestMapper(RegisterRequestDto dto) {
 
         User myUser = new User();
         myUser.setUsername(dto.getUsername());
@@ -24,7 +24,7 @@ public class RegisterRequestMapper {
 
     }
 
-    public RegisterResponseDto  RegisterResponseMapper(User user) {
+    public RegisterResponseDto registerResponseMapper(User user) {
 
         RegisterResponseDto registerResponseDto = new RegisterResponseDto();
         registerResponseDto.setId(user.getId());
