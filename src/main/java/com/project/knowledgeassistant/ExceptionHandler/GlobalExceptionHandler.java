@@ -68,10 +68,10 @@ public class GlobalExceptionHandler {
 
     }
     
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<String> handleAccessDenied(AccessDeniedException ex) {
-        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN); // <-- Returns 403 Forbidden!
-    }
+//    @ExceptionHandler(AccessDeniedException.class)
+//    public ResponseEntity<String> handleAccessDenied(AccessDeniedException ex) {
+//        return new ResponseEntity<>(ex.getMessage(), HttpStatus.FORBIDDEN); // <-- Returns 403 Forbidden!
+//    }
 
 
 

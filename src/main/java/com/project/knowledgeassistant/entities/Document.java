@@ -52,14 +52,14 @@ public class Document {
     private DocumentAcessLevel acessLevel;
 
 
-    @Column(nullable = false)
-    private String processedFileName;
-
-    @Column(nullable = false)
-    private String processedFileType;
-
-    @Column(nullable = false)
-    private String processedFilePath;
+//    @Column(nullable = false)
+//    private String processedFileName;
+//
+//    @Column(nullable = false)
+//    private String processedFileType;
+//
+//    @Column(nullable = false)
+//    private String processedFilePath;
 
 
     public Document() {
