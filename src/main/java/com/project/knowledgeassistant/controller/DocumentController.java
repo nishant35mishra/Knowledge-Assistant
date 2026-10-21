@@ -45,20 +45,6 @@ public class DocumentController {
                 .body(response);
     }
 
-    @PostMapping("/upload2/")
-    @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN','MANAGER')")
-    public ResponseEntity<DocumentUploadResponse> uploadDocument2(
-            @RequestParam("file") MultipartFile file , @RequestParam(value = "accessLevel", defaultValue = "PUBLIC") DocumentAcessLevel accessLevel ) {
-
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        DocumentUploadResponse response =
-                documentService.uploadDocument(file,authentication.getName(),accessLevel);
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(response);
-    }
 
     @GetMapping("/get/{id}")
     @PreAuthorize("hasAnyRole('EMPLOYEE','ADMIN','MANAGER','PUBLIC')")
@@ -100,8 +86,6 @@ public class DocumentController {
                 .status(HttpStatus.OK)
                 .body("document deleted successfully");
     }
-
-
 
 
 }

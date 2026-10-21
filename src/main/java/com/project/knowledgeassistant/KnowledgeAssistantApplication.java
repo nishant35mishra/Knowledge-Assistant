@@ -12,4 +12,6 @@ public class    KnowledgeAssistantApplication {
 		SpringApplication.run(KnowledgeAssistantApplication.class, args);
 	}
 
+
+
 }

@@ -49,10 +49,10 @@ public class RagService {
     public RagResponseGemini ask(String question ,String role) {
 
 
-        DocumentAcessLevel acessLevel2 = DocumentAcessLevel.valueOf(role.substring(5));
+        DocumentAcessLevel accessLevel = DocumentAcessLevel.valueOf(role.substring(5));
 
         List<RetrievedChunk> chunks =
-                retrievalService.retrieveRelevantChunks(question , acessLevel2 ,5);
+                retrievalService.retrieveRelevantChunks(question , accessLevel ,5);
 
         if (chunks.isEmpty()) {
 

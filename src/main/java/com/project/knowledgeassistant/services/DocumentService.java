@@ -33,9 +33,7 @@ public class DocumentService {
     private final ChunkingService chunkingService;
     private final DocumentRepository documentRepository;
     private final UserRepository userRepository;
-    private final EmbeddingService embeddingService;
     private final VectorStoreService vectorStoreService;
-    private final DocumentConversionService documentConversionService;
 
 
 

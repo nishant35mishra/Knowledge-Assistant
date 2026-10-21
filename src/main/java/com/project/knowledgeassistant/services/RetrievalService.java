@@ -41,12 +41,7 @@ public class RetrievalService {
                     "topK must be greater than zero");
         }
 
-        // Get the document access levels allowed for this user.
-        List<String> allowedLevels = userRole
-                .getAccessibleLevels()
-                .stream()
-                .map(Enum::name)
-                .toList();
+
 
 
 
@@ -85,7 +80,7 @@ public class RetrievalService {
                     ).build();
         };
 
-        // Perform semantic search with the access filter.
+
         SearchRequest searchRequest = SearchRequest.builder()
                 .query(question)
                 .topK(topK)
