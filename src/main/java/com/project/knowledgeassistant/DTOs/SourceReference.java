@@ -9,10 +9,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SourceReference {
 
-	private String document;
+	private String documentId;
 	
-	private Integer page;
+	private String documentName;
 	
-	private String section ;
+//	private Integer page;
+	
+	private String chunks ;
 	
 }

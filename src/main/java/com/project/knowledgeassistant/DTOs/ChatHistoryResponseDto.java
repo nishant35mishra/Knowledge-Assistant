@@ -3,6 +3,8 @@ package com.project.knowledgeassistant.DTOs;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import com.project.knowledgeassistant.entities.User;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -18,7 +20,7 @@ public class ChatHistoryResponseDto {
 	
 	private String sessionId;
 	
-	private String userEmail;
+	private User user;
 	
 	private String userQuestion;
 	

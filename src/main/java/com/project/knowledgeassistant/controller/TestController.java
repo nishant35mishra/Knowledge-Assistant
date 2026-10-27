@@ -1,11 +1,28 @@
 package com.project.knowledgeassistant.controller;
 
+import java.util.List;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.knowledgeassistant.DTOs.SearchRequest;
+import com.project.knowledgeassistant.services.EmbeddingService;
+
+import lombok.AllArgsConstructor;
+
 @RestController
+@AllArgsConstructor
 public class TestController {
+	
+	private final EmbeddingService embed;
+	
+	@PostMapping("/kuch")
+	public float[] askQuestion(@RequestBody SearchRequest req){
+		return embed.generateEmbedding(req.getQuestion());
+	}
 
     @GetMapping("/")
     public String test(){

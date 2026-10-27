@@ -20,8 +20,10 @@ import com.project.knowledgeassistant.DTOs.SourceReference;
 import com.project.knowledgeassistant.configuration.SpringSecurityConfiguration;
 import com.project.knowledgeassistant.customexception.NotFound;
 import com.project.knowledgeassistant.entities.ChatHistory;
+import com.project.knowledgeassistant.entities.User;
 import com.project.knowledgeassistant.enums.SystemCode;
 import com.project.knowledgeassistant.repositories.ChatHistoryRepository;
+import com.project.knowledgeassistant.repositories.UserRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -33,13 +35,15 @@ import lombok.extern.slf4j.Slf4j;
 @AllArgsConstructor
 @Slf4j
 @Data
-public class ChatServiceHistory {
+public class ChatHistoryService {
 
     private final SpringSecurityConfiguration springSecurityConfiguration;
 
 	private final ChatHistoryRepository chatRepo;
 	
 	private final ObjectMapper objMapper;
+	
+	private final UserRepository userRepo;
 
    
 	
@@ -53,12 +57,13 @@ public class ChatServiceHistory {
 			 log.error("Failed to serialize sources to json for a session : {}",sessionId,e	);
 			}
 		}
+		User user = userRepo.findByEmail(email).orElseThrow(()-> new NotFound(SystemCode.AUTH_USER_NOT_FOUND,"user not found"));
 		
 		ChatHistory chat = new ChatHistory();
 		chat.setAnswer(answer);
 		chat.setSessionId(sessionId);
 		chat.setSourcesJson(sourcesJson);
-		chat.setUserEmail(email);
+		chat.setUser(user);
 		chat.setUserQuestion(question);
 		return chatRepo.save(chat);
 	}
@@ -105,11 +110,22 @@ public class ChatServiceHistory {
 	}
 	
 	// delete a session belonging to a user
-	public void deleteSession(String sessionId,String userEmail) {
+	public void deleteSession(String sessionId,String userEmail,boolean isAdmin) {
+		
+		if(isAdmin) {
+			if(!chatRepo.existsBySessionId(sessionId)) {
+				throw new NotFound(SystemCode.RAG_CHAT_SESSION_NOT_FOUND, "session not found for user");
+			}
+				chatRepo.deleteBySessionId(sessionId);
+			
+		}
+		
+		else {
 		if(!chatRepo.existsBySessionIdAndUserEmail(sessionId, userEmail)) {
 			throw new NotFound(SystemCode.RAG_CHAT_SESSION_NOT_FOUND, "Session not found or access denied for sessionId : "+sessionId);
 		}
 		chatRepo.deleteBySessionIdAndUserEmail(sessionId, userEmail);
+		}
 	}
 	
 	//delete all histroy for a use
@@ -127,7 +143,7 @@ public class ChatServiceHistory {
 				log.error("Failed to deserialize sourcesJson for chat history id: {}",history.getId(),e);
 			}
 		}
-		return ChatHistoryResponseDto.builder().id(history.getId()).sessionId(history.getSessionId()).userEmail(history.getUserEmail()).userQuestion(history.getUserQuestion()).answer(history.getAnswer()).sources(source).timestamp(history.getTimestamp())
+		return ChatHistoryResponseDto.builder().id(history.getId()).sessionId(history.getSessionId()).user(history.getUser()).userQuestion(history.getUserQuestion()).answer(history.getAnswer()).sources(source).timestamp(history.getTimestamp())
 				.build();
 	}
 }
