@@ -140,9 +140,6 @@
 			<version>3.18.0</version>
 		</dependency>
 
-
-
-
 		<dependency>
 			<groupId>org.springframework.ai</groupId>
 			<artifactId>spring-ai-starter-model-ollama</artifactId>
